@@ -1,9 +1,9 @@
 #replace "" with the values for each
 host: ""
-port: ""
 database: ""
 username: ""
 password: ""
+port: ""
 table: ""
 #if you wish to change the lore or the item name you can do so here
 item-name: "Item Frame"

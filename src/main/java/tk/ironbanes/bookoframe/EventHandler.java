@@ -1,6 +1,5 @@
 package tk.ironbanes.bookoframe;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -14,16 +13,16 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
 public class EventHandler implements Listener
 {
     BookOFrame plugin = BookOFrame.getPlugin(BookOFrame.class);
+
+    //private BookOFrame plugin;
+
+
 
     //Checks if the entity the player is clicking on is an Item Frame
     @org.bukkit.event.EventHandler
@@ -52,12 +51,11 @@ public class EventHandler implements Listener
                     String blockname = world.getName()+ x +","+ y +","+ z;
 
                     //checks if the itemframe is in the list of copy frames
-                    if(checkSQLForBlock(blockname)){
+                    if(plugin.data.exists(blockname)){
                         //adds the item and updates the inventory of the player
                         p.getInventory().addItem(ItemInFrame);
                         p.updateInventory();
                     }
-
                 }
             }
         }
@@ -93,7 +91,7 @@ public class EventHandler implements Listener
                             String blockname = world.getName() + x + "," + y + "," + z;
                             //with the blocks location you pass it to addBlockToSQL to add it to the
                             //sql database to keep track of blocks that can copy
-                            addBlockToSQL(blockname, world, x, y, z);
+                            plugin.data.createBlock(blockname, world.getName(), x, y, z);
                         }
                     }
                     //clears lore to prevent it from compounding
@@ -115,83 +113,10 @@ public class EventHandler implements Listener
             double z = entity.getLocation().getZ();
             String blockname = world.getName()+ x +","+ y +","+ z;//identification key for sql
             //checks if the block is in the database
-            if(checkSQLForBlock(blockname)){
+            if(plugin.data.exists(blockname)){
                 //if the block is in the database the item frame is removed from the database
-                removeBlockFromSQL(blockname);
+                plugin.data.deleteBlock(blockname);
             }
         }
     }
-
-    public void addBlockToSQL(String blockname,World world, double x,double y,double z)
-    {
-        try{
-            if(plugin.getConnection().isClosed()){
-                plugin.mysqlSetup();
-            }
-            //creates a table if the database does not already have one
-            Statement create = plugin.getConnection().createStatement();
-            create.executeUpdate("CREATE TABLE IF NOT EXISTS "+plugin.table+"(`BLOCKNAME` VARCHAR(900),`WORLD` VARCHAR(30),`X` DOUBLE(30,5),`Y` DOUBLE(30,5), `Z` DOUBLE(30,5))");
-            //checks if the block being placed is already in the database
-            //this check is to make sure that the block is not duplicated in the database
-            if (!checkSQLForBlock(blockname)){
-                //adds the block to the table if the block was not already in the table
-                PreparedStatement insert = plugin.getConnection()
-                        .prepareStatement("INSERT INTO "+plugin.table+"(BLOCKNAME,WORLD,X,Y,Z) VALUE (?,?,?,?,?)");
-                //inputs all the values passed to the sub to the table
-                insert.setString(1,blockname);
-                insert.setString(2,world.getName());
-                insert.setDouble(3,x);
-                insert.setDouble(4,y);
-                insert.setDouble(5,z);
-                insert.executeUpdate();
-            }
-        }catch(Exception e){
-            e.printStackTrace();
-
-        }
-    }
-
-
-    public boolean checkSQLForBlock(String blockname)
-    {
-        try{
-            if(plugin.getConnection().isClosed()){
-                plugin.mysqlSetup();
-            }
-            //makes a statement to check the database for the identification key
-            PreparedStatement statement = plugin.getConnection()
-                    .prepareStatement("SELECT * FROM "+plugin.table+" WHERE `BLOCKNAME`=?");
-            statement.setString(1,blockname);
-            ResultSet results = statement.executeQuery();
-            //if the statement find a match to the blockname id key then it returns true
-            if (results.next()){
-                return true;
-            }
-        }catch(Exception e){
-            e.printStackTrace();
-            return false;
-        }
-        return false;
-    }
-
-    public void removeBlockFromSQL(String blockname)
-    {
-        try{
-            //deletes the row that has the id key blockname to remove the block so it can't copy books
-            PreparedStatement remove = plugin.getConnection()
-                    .prepareStatement("DELETE FROM "+plugin.table + " WHERE `BLOCKNAME`= ?");
-            remove.setString(1,blockname);
-            remove.executeUpdate();
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-    }
-
-
-
-
-
-
-
-
 }

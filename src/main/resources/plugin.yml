@@ -1,8 +1,7 @@
 name: BookOFrame
-version: 1.o
-author: IronBanes
+version: '${version}'
 main: tk.ironbanes.bookoframe.BookOFrame
-api-version: 1.16
+api-version: 1.19
 commands:
   bookoframe:
     description: Creates a item frame to place down to allow the copying of a book
@@ -17,4 +16,3 @@ permissions:
   bookoframe.use:
     description: allows the player to copy the book from the itemframe
     default: false
-

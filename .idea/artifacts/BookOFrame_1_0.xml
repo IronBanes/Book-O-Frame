@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" name="BookOFrame_1.0">
-    <output-path>$PROJECT_DIR$/out/artifacts/Book_O_Frame_jar</output-path>
-    <root id="archive" name="BookOFrame_1.0.jar">
-      <element id="module-output" name="Book-O-Frame" />
-    </root>
-  </artifact>
-</component>
